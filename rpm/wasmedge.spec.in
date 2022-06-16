@@ -10,6 +10,7 @@ URL:     https://github.com/WasmEdge/WasmEdge
 Source0: https://github.com/WasmEdge/WasmEdge/releases/download/%{gittag}/WasmEdge-%{gittag}-src.tar.gz
 BuildRequires: gcc-c++,cmake,ninja-build,boost-devel,spdlog-devel,llvm-devel,lld-devel,git
 Requires:      llvm
+# Currently wasmedge could only be built on specific arches
 ExclusiveArch: x86_64 aarch64
 
 %description
@@ -22,15 +23,6 @@ Provides: wasmedge-devel
 
 %description devel
 This package contains necessary header files for WasmEdge development.
-
-%package lib
-#Requires:
-Summary: WasmEdge library
-Requires: llvm
-Provides: wasmedge-lib
-
-%description lib
-This package contains necessary library files for WasmEdge development.
 
 %prep
 %autosetup -n wasmedge
@@ -45,15 +37,20 @@ cmake --build .
 %install
 cd build
 DESTDIR=%{buildroot} cmake --build . --target install
+mv %{buildroot}/%{_libdir}/libwasmedge_c.so %{buildroot}/%{_libdir}/libwasmedge_c.so.%{gittag}
+mv %{buildroot}/%{_libdir}/wasmedge/libwasmedgePluginWasmEdgeProcess.so %{buildroot}/%{_libdir}/wasmedge/libwasmedgePluginWasmEdgeProcess.so.%{gittag}
+ln -s libwasmedge_c.so.%{gittag} %{buildroot}/%{_libdir}/libwasmedge_c.so
+ln -s libwasmedgePluginWasmEdgeProcess.so.%{gittag} %{buildroot}/%{_libdir}/wasmedge/libwasmedgePluginWasmEdgeProcess.so
 
 %files
 %{_bindir}/*
+%{_libdir}/libwasmedge_c.so.%{gittag}
+%{_libdir}/wasmedge/libwasmedgePluginWasmEdgeProcess.so.%{gittag}
 
 %files devel
 %{_includedir}/*
-
-%files lib
-%{_libdir}/*
+%{_libdir}/libwasmedge_c.so
+%{_libdir}/wasmedge/libwasmedgePluginWasmEdgeProcess.so
 
 %changelog
 %autochangelog
